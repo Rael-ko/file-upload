@@ -1,14 +1,14 @@
 import firebase from 'firebase';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCIhMHGk4o6aWYuHFmwYrUVg35qejywCyw",
-  authDomain: "fileupload-cc423.firebaseapp.com",
-  projectId: "fileupload-cc423",
-  storageBucket: "fileupload-cc423.appspot.com",
-  messagingSenderId: "121987798417",
-  appId: "1:121987798417:web:be6c04c6c3fd5fe2e13630"
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID
 };
 
 firebase.initializeApp(firebaseConfig);
-var storage = firebase.storage();
-export default storage;
+export const storage = firebase.storage();
+export const firestore = firebase.firestore();

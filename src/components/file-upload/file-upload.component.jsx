@@ -13,7 +13,7 @@ import {
   ButtonContainer
 } from "./file-upload.styles";
 import ProgressBar from "@ramonak/react-progress-bar";
-import storage from '../../firebase';
+import {storage, firestore} from '../../firebase';
 
 const FileUpload = ({
   label,
@@ -50,7 +50,8 @@ const FileUpload = ({
   const submit = () => {
     if (Object.keys(files).length > 0) {
       Object.keys(files).forEach(key => {
-        var uploadTask = storage.ref(`/files/${key}`).put(files[key].file)
+        const fileName = getFileName(key);
+        var uploadTask = storage.ref(`/files/${fileName}`).put(files[key].file)
         uploadTask.on('state_changed', function(snapshot){
           var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           files[key].progress = parseInt(progress);
@@ -58,13 +59,37 @@ const FileUpload = ({
         }, function(error) {
           console.error(error);
         }, function() {
-          var downloadURL = uploadTask.snapshot.downloadURL;
-          console.log(downloadURL);
+          uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+            firestore.collection('files').add({
+              file_name: key,
+              link: url
+            }).then((ref) => {
+              console.log('file saved', ref.id);
+            })
+          })
         });
       })
     } else {
       alert('files are not selected')
     }
+  }
+
+  const getFileName = (key) => {
+    var fileExt = key.split('.').pop();
+    const date = new Date();
+    const randomStr = makeid(16);
+    const dateStr = `${randomStr}_${date.getFullYear()}_${date.getMonth()}_${date.getDay()}_${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}`
+    return `${dateStr}.${fileExt}`;
+  }
+
+  const makeid = (length) => {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
   }
 
   const clear = () => {
